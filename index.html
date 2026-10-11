@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sardar Medical Hall - AI Pharmacy</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<!-- Firebase App (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- Firebase Realtime Database (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- Firebase Config Initialization -->
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAU56NV8SlXIEPSd4qWrxnjoNbagnUR0hk",
+    authDomain: "sarder-medical-hall.firebaseapp.com",
+    databaseURL: "https://sarder-medical-hall-default-rtdb.firebaseio.com",
+    projectId: "sarder-medical-hall",
+    storageBucket: "sarder-medical-hall.firebasestorage.app",
+    messagingSenderId: "187686836659",
+    appId: "1:187686836659:web:a90917664726f6772d13c6",
+    measurementId: "G-MD14FZ04V0"
+  };
+
+  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.database();
+  }
+</script>
+
+<style>
+:root {
+  --primary-red: #8B1E3F;
+  --primary-color: #e53935;
+  --bg-light: #F8F9FA;
+  --card-border: #EAEAEA;
+  --text-dark: #222222;
+  --text-muted: #666666;
+  --link-blue: #0288D1;
+  --pink-bg: #fde8e8;
+  --blue-bg: #e1f5fe;
+  --green-bg: #e8f5e9;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  margin: 0; padding: 12px;
+  padding-bottom: 75px;
+}
+
+.app-header {
+  background-color: #ffffff;
+  padding: 12px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.store-info { display: flex; align-items: center; gap: 12px; }
+.store-logo {
+  width: 42px; height: 42px; background: var(--primary-color);
+  color: white; border-radius: 10px; display: flex;
+  align-items: center; justify-content: center; font-size: 22px;
+}
+
+.store-title { font-size: 16px; font-weight: 700; color: var(--primary-color); margin: 0; }
+.store-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.container { max-width: 900px; margin: 0 auto; }
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+.grid-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.menu-card {
+  background: #ffffff; border: 1px solid var(--card-border);
+  border-radius: 16px; padding: 20px 10px 15px 10px; text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); cursor: pointer; position: relative;
+}
+
+.menu-card .icon-box { font-size: 28px; color: var(--primary-color); margin-bottom: 8px; }
+.menu-card .title { font-weight: 600; font-size: 12px; color: var(--text-dark); }
+
+.badge-count {
+  position: absolute; top: 10px; right: 12px;
+  background: var(--primary-color); color: white;
+  font-size: 11px; padding: 2px 7px; border-radius: 12px; font-weight: bold;
+}
+
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+.btn-back {
+  background: #ffffff; border: 1px solid #ddd; width: 35px; height: 35px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.filter-row {
+  display: flex; gap: 8px; margin-bottom: 12px;
+  overflow-x: auto; padding-bottom: 4px;
+}
+
+.btn-filter-icon {
+  background: #EBF5FB; border: 1px solid #D0E3F0;
+  padding: 6px 12px; border-radius: 8px; color: #0288D1; cursor: pointer;
+}
+
+.btn-pill {
+  background: #FDEDEC; border: 1px solid #FADBD8;
+  color: #78281F; padding: 6px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+}
+
+.select-pill {
+  background: #EBF5FB; border: 1px solid #D0E3F0;
+  color: #1B4F72; padding: 6px 12px; border-radius: 20px;
+  font-size: 13px; outline: none;
+}
+
+.search-box { position: relative; margin-bottom: 10px; }
+.search-box input {
+  width: 100%; padding: 10px 36px; border: 1px solid #E0E0E0;
+  border-radius: 10px; font-size: 14px; box-sizing: border-box; background: #fff;
+}
+.search-box .fa-magnifying-glass { position: absolute; left: 12px; top: 13px; color: #999; }
+.search-box .fa-xmark { position: absolute; right: 12px; top: 13px; color: #999; cursor: pointer; }
+
+.total-text { text-align: right; font-size: 14px; font-weight: 600; color: #444; margin-bottom: 12px; }
+
+.cust-summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+.cust-stat-card { padding: 12px 8px; border-radius: 12px; text-align: center; }
+.cust-stat-card.pink { background-color: var(--pink-bg); }
+.cust-stat-card.blue { background-color: var(--blue-bg); }
+.cust-stat-card.green { background-color: var(--green-bg); }
+.cust-stat-card .amount { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+.cust-stat-card.pink .amount { color: #d32f2f; }
+.cust-stat-card.blue .amount { color: #0288d1; }
+.cust-stat-card.green .amount { color: #2e7d32; }
+.cust-stat-card .label { font-size: 11px; color: #666; font-weight: 500; }
+
+.data-card {
+  background: white; border: 1px solid var(--card-border);
+  border-radius: 14px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-top: 10px;
+}
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px; }
+input, select {
+  width: 100%; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid #ccc; font-size: 13px; box-sizing: border-box; background: #fafafa; outline: none;
+}
+
+button.btn-submit {
+  background: var(--primary-color); color: white; border: none;
+  padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;
+}
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--card-border); font-size: 12px; }
+th { color: var(--text-muted); font-weight: 600; background: #fafafa; }
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #ffffff; display: flex; justify-around: space-around;
+  padding: 10px 0 6px 0; border-top: 1px solid var(--card-border); z-index: 1000;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  color: #999; font-size: 11px; cursor: pointer; background: none; border: none; width: 20%;
+}
+.nav-item.active { color: var(--primary-color); font-weight: 600; }
+.loading { display: none; text-align: center; font-weight: bold; color: var(--primary-color); padding: 15px; background: #fff; border-radius: 10px; margin-top: 10px; }
+
+.search-results-list {
+  position: absolute; background: white; border: 1px solid #ccc;
+  width: 100%; max-height: 200px; overflow-y: auto; z-index: 100;
+  border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.search-results-list div { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+.search-results-list div:hover { background: #f0f0f0; }
+
+.scanned-input {
+  width: 100%; padding: 5px; border: 1px solid #ddd;
+  border-radius: 4px; box-sizing: border-box; font-size: 12px;
+}
+
+#printableReceipt { display: none; }
+
+@media print {
+    @page { size: 58mm auto; margin: 0mm; }
+    body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+    body * { visibility: hidden !important; }
+    #printableReceipt, #printableReceipt * { visibility: visible !important; }
+    #printableReceipt {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important; top: 0 !important;
+        width: 58mm !important; 
+        padding: 0 2mm !important;
+        box-sizing: border-box !important;
+        font-family: monospace !important; font-size: 11px !important;
+        line-height: 1.2 !important; color: #000 !important;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+<div class="store-info">
+<div class="store-logo"><i class="fa-solid fa-notes-medical"></i></div>
+<div>
+<p class="store-title">সরদার মেডিকেল হল</p>
+<p class="store-subtitle">স্মার্ট AI চালিত ফার্মেসি</p>
+</div>
+</div>
+</div>
+
+<div class="container">
+<!-- HOME SECTION -->
+<div id="sec-home" class="page-section active">
+<div class="grid-menu">
+<div class="menu-card" onclick="openSection('sec-sale')">
+<div class="icon-box"><i class="fa-solid fa-cart-shopping"></i></div>
+<div class="title">POS / Sale</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-generics')">
+<div class="icon-box"><i class="fa-solid fa-dna"></i></div>
+<div class="title">Generics</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-customers')">
+<div class="icon-box"><i class="fa-solid fa-users"></i></div>
+<div class="title">Customer</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-product-list')">
+<div class="icon-box"><i class="fa-solid fa-list"></i></div>
+<div class="title">Product List</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-purchase')">
+<div class="icon-box"><i class="fa-solid fa-bag-shopping"></i></div>
+<div class="title">Purchase</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-sale-record')">
+<div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
+<div class="title">Sale & Profit</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-purchase-record')">
+<div class="icon-box"><i class="fa-solid fa-file-invoice"></i></div>
+<div class="title">Purchase Record</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-short-items')">
+<span class="badge-count" id="badgeShortCount">0</span>
+<div class="icon-box"><i class="fa-solid fa-box-open"></i></div>
+<div class="title">Short Items</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-expired')">
+<span class="badge-count" id="badgeExpiredCount">0</span>
+<div class="icon-box"><i class="fa-solid fa-calendar-xmark"></i></div>
+<div class="title">Expired</div>
+</div>
+<div class="menu-card" onclick="openSection('sec-ai-scan')">
+<div class="icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+<div class="title">AI Invoice Scan</div>
+</div>
+
+<div class="menu-card" onclick="openSection('sec-ai-prescription')" style="background: #e53935; color: white;">
+<div class="icon-box" style="color: white;"><i class="fa-solid fa-file-prescription"></i></div>
+<div class="title" style="color: white; font-weight: bold;">AI Prescription Reader</div>
+</div>
+</div>
+
+<div class="data-card" style="margin-top:20px; text-align:center;">
+<h4><i class="fa-solid fa-database"></i> ডাটা ব্যাকআপ ও রিস্টোর</h4>
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+<button class="btn-submit" onclick="exportData()" style="background:#0288D1;"><i class="fa-solid fa-download"></i> ব্যাকআপ ডাউনলোড</button>
+<button class="btn-submit" onclick="document.getElementById('importFile').click()" style="background:#388E3C;"><i class="fa-solid fa-upload"></i> ডাটা রিস্টোর</button>
+<input type="file" id="importFile" style="display:none;" accept=".json" onchange="importData(event)">
+</div>
+</div>
+</div>
+
+<!-- GENERICS SEARCH SECTION -->
+<div id="sec-generics" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Generics Search</h3>
+<div></div>
+</div>
+
+<div class="filter-row">
+<button class="btn-filter-icon"><i class="fa-solid fa-sliders"></i></button>
+<button class="btn-pill">Owned</button>
+<select id="searchType" class="select-pill">
+<option value="generic">Generic name</option>
+<option value="name">Product name</option>
+<option value="company">Company name</option>
+</select>
+</div>
+
+<div class="search-box">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input type="text" id="productSearchInput" onkeyup="renderGenericSearch()" placeholder="Search product or generic...">
+<i class="fa-solid fa-xmark" onclick="document.getElementById('productSearchInput').value=''; renderGenericSearch();"></i>
+</div>
+
+<div class="total-text">
+Total: <span id="totalProductCount">0</span>
+</div>
+
+<div id="appProductCardsContainer"></div>
+</div>
+
+<!-- POS / SALE SECTION -->
+<div id="sec-sale" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">স্মার্ট বিলিং (Sale / POS)</h3>
+<div></div>
+</div>
+<div class="data-card">
+<div class="form-grid" style="margin-bottom: 12px;">
+<div>
+<label style="font-size:11px; font-weight:bold;">ইনভয়েস নম্বর</label>
+<input type="text" id="posInvoiceNo" readonly style="background:#eee;">
+</div>
+<div>
+<label style="font-size:11px; font-weight:bold;">কাস্টমারের নাম</label>
+<input type="text" id="posCustName" placeholder="কাস্টমারের নাম">
+</div>
+<div>
+<label style="font-size:11px; font-weight:bold;">মোবাইল নম্বর</label>
+<input type="text" id="posCustPhone" placeholder="017xxxxxxxx">
+</div>
+</div>
+
+<div style="position:relative;">
+<input type="text" id="medSearchInput" onkeyup="searchMedicineForPOS()" placeholder="🔍 ওষুধের নাম লিখে সার্চ করুন...">
+<div id="posSearchResults" class="search-results-list" style="display:none;"></div>
+</div>
+
+<table>
+<thead>
+<tr><th>আইটেম</th><th>পরিমাণ</th><th>পিস MRP</th><th>মোট</th><th>অ্যাকশন</th></tr>
+</thead>
+<tbody id="tblCart"></tbody>
+</table>
+
+<div style="margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 8px;">
+<div style="display:flex; justify-content:space-between; font-size: 13px; margin-bottom:5px;">
+<span>সাব-টোটাল:</span> <span>৳<span id="cartSubTotal">0.00</span></span>
+</div>
+
+<div style="display:flex; gap:8px; align-items:center; margin: 8px 0;">
+<span style="font-size:13px; font-weight:bold;">ডিসকাউন্ট:</span>
+<select id="discountType" onchange="calculateTotals()" style="width:110px;">
+<option value="flat">Flat (৳)</option>
+<option value="percent">Percentage (%)</option>
+</select>
+<input type="number" id="discountValue" value="0" oninput="calculateTotals()" style="width:90px;" placeholder="0">
+<span style="font-size:12px; color:#d32f2f;">(-৳<span id="discountAmount">0.00</span>)</span>
+</div>
+
+<div style="display:flex; justify-content:space-between; font-size: 16px; font-weight: bold; color: var(--primary-color); margin:10px 0; background:#ffebee; padding:8px 10px; border-radius:6px;">
+<span>সর্বমোট বিল:</span> <span>৳<span id="cartGrandTotal">0.00</span></span>
+</div>
+
+<div class="form-grid" style="margin-top:10px;">
+<div>
+<label style="font-size:11px; font-weight:bold;">পেইড পরিমাণ (৳)</label>
+<input type="number" id="paidAmount" oninput="calculateTotals()" placeholder="0.00">
+</div>
+<div>
+<label style="font-size:11px; font-weight:bold;">বকেয়া / Due (৳)</label>
+<input type="text" id="dueAmount" readonly value="0.00" style="background:#fff3e0; font-weight:bold; color:#e65100;">
+</div>
+</div>
+
+<button class="btn-submit" style="width: 100%; margin-top: 12px;" onclick="checkoutSale()">পেমেন্ট ও বিল প্রিন্ট করুন</button>
+</div>
+</div>
+</div>
+
+<!-- PRODUCT LIST / STOCK SECTION -->
+<div id="sec-product-list" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Product List / Stock</h3>
+<div></div>
+</div>
+<div class="data-card">
+<h4 style="margin-top:0;" id="formTitle">নতুন প্রোডাক্ট যুক্ত করুন</h4>
+<input type="hidden" id="editProductId">
+<div class="form-grid">
+<input type="text" id="pName" placeholder="ওষুধের নাম">
+<input type="text" id="pCompany" placeholder="কোম্পানি">
+<input type="text" id="pGeneric" placeholder="জেনেরিক নাম">
+<input type="number" id="pPcsPerBox" placeholder="প্রতি বক্সে কত পিস? (যেমন: 100)" value="100">
+<input type="number" id="pStockBox" placeholder="স্টক (মোট বক্স)">
+<input type="number" id="pBoxMrp" placeholder="১ বক্সের MRP (টাকা)">
+<input type="number" id="pBoxBuyPrice" placeholder="১ বক্সের কেনা দাম">
+<input type="date" id="pExpDate">
+</div>
+<button class="btn-submit" id="btnSaveProduct" onclick="saveProduct()" style="width:100%; margin-bottom:15px;">স্টকে সেভ করুন</button>
+
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr>
+<th>নাম ও কোম্পানি</th>
+<th>জেনেরিক</th>
+<th>মোট পিস স্টক</th>
+<th>১ পিসের MRP</th>
+<th>অ্যাকশন</th>
+</tr>
+</thead>
+<tbody id="tblProductList"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- CUSTOMERS SECTION -->
+<div id="sec-customers" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Customer Management</h3>
+<div></div>
+</div>
+<div class="cust-summary-grid">
+<div class="cust-stat-card pink">
+<div class="amount" id="totalDueText">৳0.00</div>
+<div class="label">মোট বকেয়া</div>
+</div>
+<div class="cust-stat-card blue">
+<div class="amount" id="totalAdvanceText">৳0.00</div>
+<div class="label">মোট এডভান্স</div>
+</div>
+<div class="cust-stat-card green">
+<div class="amount" id="totalPaidCollection">৳0.00</div>
+<div class="label">সংগৃহীত জমা</div>
+</div>
+</div>
+<div class="data-card">
+<h4 style="margin-top:0;">নতুন কাস্টমার সেভ করুন</h4>
+<div class="form-grid">
+<input type="text" id="cName" placeholder="কাস্টমারের নাম">
+<input type="text" id="cPhone" placeholder="মোবাইল নম্বর">
+<input type="number" id="cDue" placeholder="বকেয়া টাকা">
+</div>
+<button class="btn-submit" style="width:100%; margin-bottom:15px;" onclick="addCustomer()">কাস্টমার সেভ করুন</button>
+
+<h4>কাস্টমার তালিকা ও বাকি জমা</h4>
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr><th>নাম ও ফোন</th><th>বকেয়া</th><th>টাকা জমা গ্রহণ</th><th>অ্যাকশন</th></tr>
+</thead>
+<tbody id="tblCustomers"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- PURCHASE SECTION -->
+<div id="sec-purchase" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Purchase Management</h3>
+<div></div>
+</div>
+<div class="data-card">
+<p>এখানে কেনাকাটার তথ্য রিসিভ করা যাবে।</p>
+</div>
+</div>
+
+<!-- SALE RECORD & PROFIT SECTION -->
+<div id="sec-sale-record" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Sale & Net Profit Records</h3>
+<div></div>
+</div>
+<div class="cust-summary-grid" style="grid-template-columns: 1fr 1fr;">
+<div class="cust-stat-card blue">
+<div class="amount" id="totalSalesAmount">৳0.00</div>
+<div class="label">সর্বমোট বিক্রি</div>
+</div>
+<div class="cust-stat-card green">
+<div class="amount" id="totalProfitAmount">৳0.00</div>
+<div class="label">সর্বমোট নিট লাভ (Net Profit)</div>
+</div>
+</div>
+
+<div class="data-card">
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr><th>মেমো / তারিখ</th><th>কাস্টমার</th><th>বিক্রি</th><th>লাভ</th><th>প্রিন্ট</th></tr>
+</thead>
+<tbody id="tblSaleRecords"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- PURCHASE RECORD SECTION -->
+<div id="sec-purchase-record" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Purchase Record</h3>
+<div></div>
+</div>
+<div class="data-card">
+<p>ক্রয়ের রেকর্ড তালিকা দেখতে পাবেন।</p>
+</div>
+</div>
+
+<!-- SHORT ITEMS SECTION -->
+<div id="sec-short-items" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Short Items (কম স্টক)</h3>
+<div></div>
+</div>
+<div class="data-card">
+<table>
+<thead>
+<tr><th>নাম</th><th>বর্তমান স্টক (পিস)</th></tr>
+</thead>
+<tbody id="tblShortItems"></tbody>
+</table>
+</div>
+</div>
+
+<!-- EXPIRED SECTION -->
+<div id="sec-expired" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">Expired Items</h3>
+<div></div>
+</div>
+<div class="data-card">
+<table>
+<thead>
+<tr><th>নাম</th><th>মেয়াদ শেষ</th></tr>
+</thead>
+<tbody id="tblExpiredItems"></tbody>
+</table>
+</div>
+</div>
+
+<!-- AI INVOICE SCANNER SECTION -->
+<div id="sec-ai-scan" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">🤖 AI চালানের আইটেম স্ক্যানার</h3>
+<button style="border:none; background:none; cursor:pointer;" onclick="toggleKeyBox()"><i class="fa-solid fa-key"></i> API Key সেটিংস</button>
+</div>
+
+<div id="keyBoxContainer" style="display:none;" class="data-card">
+<h4>Gemini API Key সেট করুন</h4>
+<input type="text" id="geminiApiKey" placeholder="আপনার API Key বসান">
+<button class="btn-submit" onclick="saveApiKey()" style="margin-top:8px; width:100%;">সেভ করুন</button>
+</div>
+
+<div class="data-card">
+<p style="margin-top:0; font-size:13px; color:#555;">কোম্পানির চালানের ছবি আপলোড করুন:</p>
+<input type="file" id="invoiceFileInput" accept="image/*">
+<button class="btn-submit" onclick="analyzeInvoiceWithGeminiAI()" style="width:100%; margin-top:10px;">
+<i class="fa-solid fa-wand-magic-sparkles"></i> AI দিয়ে স্ক্যান করুন
+</button>
+
+<div id="aiLoading" class="loading">
+<i class="fa-solid fa-spinner fa-spin"></i> AI ইনভয়েস স্ক্যান করছে, অনুগ্রহ করে অপেক্ষা করুন...
+</div>
+</div>
+
+<div id="aiResultCard" class="data-card" style="display:none; margin-top:15px;">
+<h4>স্ক্যানকৃত আইটেমসমূহ</h4>
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr>
+<th>ওষুধের নাম</th>
+<th>কোম্পানি</th>
+<th>জেনেরিক</th>
+<th>বক্স সংখ্যা</th>
+<th>পিস/বক্স</th>
+<th>বক্স কেনা দাম</th>
+<th>বক্স MRP</th>
+<th>মেয়াদ</th>
+<th>অ্যাকশন</th>
+</tr>
+</thead>
+<tbody id="tblScannedItems"></tbody>
+</table>
+</div>
+<button class="btn-submit" onclick="addAllScannedToStock()" style="width:100%; margin-top:12px; background:#2e7d32;">
+স্টকে সেভ করুন
+</button>
+</div>
+</div>
+
+<!-- AI PRESCRIPTION READER SECTION -->
+<div id="sec-ai-prescription" class="page-section">
+<div class="section-header">
+<button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 style="margin:0;">📄 AI Prescription Reader</h3>
+<div></div>
+</div>
+
+<div class="data-card">
+<p style="margin-top:0; font-size:13px; color:#555;">রোগীর প্রেসক্রিপশনের ছবি আপলোড করুন। AI স্বয়ংক্রিয়ভাবে ঔষধের নাম পড়ে আপনার স্টকের সাথে ম্যাচ করবে:</p>
+<input type="file" id="prescriptionFileInput" accept="image/*" onchange="previewPrescriptionImage(event)">
+
+<div id="prescriptionPreviewContainer" style="display:none; text-align:center; margin-top:10px;">
+<img id="prescriptionImgPreview" src="" style="max-width:100%; max-height:220px; border-radius:8px; border:1px solid #ddd;">
+</div>
+
+<button class="btn-submit" onclick="analyzePrescriptionWithAI()" style="width:100%; margin-top:12px; background:#e53935;">
+<i class="fa-solid fa-wand-magic-sparkles"></i> প্রেসক্রিপশন স্ক্যান ও স্টক চেক
+</button>
+
+<div id="prescriptionLoading" class="loading">
+<i class="fa-solid fa-spinner fa-spin"></i> AI প্রেসক্রিপশন পড়ে আপনার স্টক চেক করছে...
+</div>
+</div>
+
+<div id="prescriptionResultCard" class="data-card" style="display:none; margin-top:15px;">
+<h4>প্রেসক্রিপশন ও স্টক রেজাল্ট:</h4>
+<div style="overflow-x:auto;">
+<table>
+<thead>
+<tr>
+<th>ঔষধের নাম (প্রেসক্রিপশন)</th>
+<th>ডোজ/নিয়ম</th>
+<th>স্টক স্ট্যাটাস</th>
+<th>বর্তমান স্টক</th>
+</tr>
+</thead>
+<tbody id="tblPrescriptionResults"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- RECEIPT TEMPLATE FOR PRINTING -->
+<div id="printableReceipt">
+<div style="text-align:center;">
+<h3 style="margin: 0; padding: 0;">সরদার মেডিকেল হল</h3>
+<p style="margin: 2px 0; font-size: 12px;">গোপালপুর বাজার, মান্দা- নওগাঁ</p>
+<p style="margin: 2px 0; font-size: 12px;">প্রো: শিহাব আহম্মেদ</p>
+<p style="margin:2px 0;">মোবাইল: 01750231191</p>
+--------------------------------
+</div>
+
+<div style="margin:4px 0;">
+<div>মেমো: <span id="recInvoice"></span></div>
+<div>তারিখ: <span id="recDate"></span></div>
+<div>গ্রাহক: <span id="recCustName"></span></div>
+<div>ফোন: <span id="recCustPhone"></span></div>
+</div>
+
+--------------------------------
+
+<div id="recItems"></div>
+
+--------------------------------
+
+<div>
+<div style="display:flex; justify-content:space-between;"><span>সাব-টোটাল:</span><span id="recSubTotal">৳0.00</span></div>
+<div style="display:flex; justify-content:space-between;"><span>ডিসকাউন্ট:</span><span id="recDiscount">৳0.00</span></div>
+<div style="display:flex; justify-content:space-between; font-weight:bold;"><span>মোট বিল:</span><span id="recGrandTotal">৳0.00</span></div>
+<div style="display:flex; justify-content:space-between;"><span>পেইড:</span><span id="recPaid">৳0.00</span></div>
+<div style="display:flex; justify-content:space-between;"><span>বকেয়া:</span><span id="recDue">৳0.00</span></div>
+</div>
+
+--------------------------------
+<p style="text-align:center; margin-top:6px;">ধন্যবাদ, আবার আসবেন!</p>
+<br><br>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+<button class="nav-item active" onclick="goHome(this)">
+<i class="fa-solid fa-house"></i> <span>Home</span>
+</button>
+<button class="nav-item" onclick="openSection('sec-sale', this)">
+<i class="fa-solid fa-cart-shopping"></i> <span>POS</span>
+</button>
+<button class="nav-item" onclick="openSection('sec-generics', this)">
+<i class="fa-solid fa-dna"></i> <span>Generics</span>
+</button>
+<button class="nav-item" onclick="openSection('sec-product-list', this)">
+<i class="fa-solid fa-boxes-stacked"></i> <span>Stock</span>
+</button>
+</div>
+
+<!-- SCRIPT SECTION -->
+<script>
+const DEFAULT_API_KEY = "AQ.Ab8RN6I29Nbt8T9K9bVhceev2IiVO4ElSCUG4lptar8VouSLDg";
+
+let products = JSON.parse(localStorage.getItem('smh_products')) || [
+  { id: 1, name: "Napa 500mg", company: "Beximco", generic: "Paracetamol", pcsPerBox: 100, stock: 150, buyPrice: 1.0, mrp: 1.2, exp: "2027-12-31" },
+  { id: 2, name: "Domaid 10", company: "Square", generic: "Domperidone", pcsPerBox: 100, stock: 100, buyPrice: 3.2, mrp: 4.0, exp: "2026-10-10" }
+];
+
+let customers = JSON.parse(localStorage.getItem('smh_customers')) || [
+  { id: 1, name: "রহিম মিঞা", phone: "01700000000", due: 450.00, collected: 0 }
+];
+
+let salesHistory = JSON.parse(localStorage.getItem('smh_sales')) || [];
+let cart = [];
+
+function initPOS() {
+  document.getElementById('posInvoiceNo').value = "INV-" + Math.floor(100000 + Math.random() * 900000);
+}
+
+// ১. ডাটা লোকাল ও ফায়ারবেস উভয় জায়গায় সেভ করার ফাংশন
+function saveData() {
+  localStorage.setItem('smh_products', JSON.stringify(products));
+  localStorage.setItem('smh_customers', JSON.stringify(customers));
+  localStorage.setItem('smh_sales', JSON.stringify(salesHistory));
+  updateBadges();
+
+  // ফায়ারবেসে রিয়েল-টাইম ডাটা পুশ করা
+  if (window.db) {
+    window.db.ref('app_data/products').set(products);
+    window.db.ref('app_data/customers').set(customers);
+    window.db.ref('app_data/salesHistory').set(salesHistory);
+  }
+}
+
+// ২. মোবাইল বা ল্যাপটপে ডাটা অটো আপডেট পাওয়ার লাইভ লিসেনার
+function listenToCloudUpdates() {
+  if (!window.db) return;
+
+  // স্টক লাইভ সিঙ্ক
+  window.db.ref('app_data/products').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      products = data;
+      localStorage.setItem('smh_products', JSON.stringify(products));
+      updateBadges();
+      if (document.getElementById('sec-product-list').classList.contains('active')) renderProductList();
+      if (document.getElementById('sec-generics').classList.contains('active')) renderGenericSearch();
+    }
+  });
+
+  // কাস্টমার লাইভ সিঙ্ক
+  window.db.ref('app_data/customers').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      customers = data;
+      localStorage.setItem('smh_customers', JSON.stringify(customers));
+      if (document.getElementById('sec-customers').classList.contains('active')) renderCustomers();
+    }
+  });
+
+  // সেলস রেকর্ড লাইভ সিঙ্ক
+  window.db.ref('app_data/salesHistory').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      salesHistory = data;
+      localStorage.setItem('smh_sales', JSON.stringify(salesHistory));
+      if (document.getElementById('sec-sale-record').classList.contains('active')) renderSalesRecord();
+    }
+  });
+}
+
+function openSection(secId, btnElement) {
+  document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(secId).classList.add('active');
+
+  if (btnElement) {
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+    btnElement.classList.add('active');
+  }
+
+  if(secId === 'sec-sale') initPOS();
+  if(secId === 'sec-product-list') renderProductList();
+  if(secId === 'sec-customers') renderCustomers();
+  if(secId === 'sec-generics') renderGenericSearch();
+  if(secId === 'sec-short-items') renderShortItems();
+  if(secId === 'sec-expired') renderExpiredItems();
+  if(secId === 'sec-sale-record') renderSalesRecord();
+}
+
+function goHome(btnElement) {
+  openSection('sec-home', btnElement || document.querySelectorAll('.nav-item')[0]);
+}
+
+function safeToFixed(val, decimals = 2) {
+  const num = Number(val);
+  return isNaN(num) ? (0).toFixed(decimals) : num.toFixed(decimals);
+}
+
+function updateBadges() {
+  const shortCount = products.filter(p => p.stock <= 20).length;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const expiredCount = products.filter(p => p.exp && p.exp <= todayStr).length;
+
+  document.getElementById('badgeShortCount').innerText = shortCount;
+  document.getElementById('badgeExpiredCount').innerText = expiredCount;
+}
+
+function getStoredApiKey() {
+  return localStorage.getItem('smh_gemini_key') || DEFAULT_API_KEY;
+}
+
+function saveApiKey() {
+  const key = document.getElementById('geminiApiKey').value.trim();
+  if(key) {
+    localStorage.setItem('smh_gemini_key', key);
+    alert("API Key সেভ করা হয়েছে!");
+    toggleKeyBox();
+  }
+}
+
+function toggleKeyBox() {
+  const box = document.getElementById('keyBoxContainer');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveProduct() {
+  const editId = document.getElementById('editProductId').value;
+  const name = document.getElementById('pName').value;
+  const company = document.getElementById('pCompany').value;
+  const generic = document.getElementById('pGeneric').value;
+  const pcsPerBox = parseInt(document.getElementById('pPcsPerBox').value) || 1;
+  const boxStock = parseInt(document.getElementById('pStockBox').value) || 0;
+  const boxMrp = parseFloat(document.getElementById('pBoxMrp').value) || 0;
+  const boxBuyPrice = parseFloat(document.getElementById('pBoxBuyPrice').value) || 0;
+  const exp = document.getElementById('pExpDate').value;
+
+  if(!name) { alert("ওষুধের নাম লিখুন!"); return; }
+
+  const totalPcsStock = boxStock * pcsPerBox;
+  const unitMrp = boxMrp / pcsPerBox;
+  const unitBuyPrice = boxBuyPrice / pcsPerBox;
+
+  if(editId) {
+      const prod = products.find(p => p.id == editId);
+      if(prod) {
+          prod.name = name;
+          prod.company = company;
+          prod.generic = generic;
+          prod.pcsPerBox = pcsPerBox;
+          prod.stock = totalPcsStock;
+          prod.buyPrice = unitBuyPrice;
+          prod.mrp = unitMrp;
+          prod.exp = exp;
+      }
+      alert("প্রোডাক্ট আপডেট হয়েছে!");
+  } else {
+      products.push({ 
+          id: Date.now(), 
+          name, 
+          company, 
+          generic, 
+          pcsPerBox, 
+          stock: totalPcsStock, 
+          buyPrice: unitBuyPrice, 
+          mrp: unitMrp, 
+          exp 
+      });
+      alert("প্রোডাক্ট সফলভাবে সেভ হয়েছে!");
+  }
+
+  saveData();
+  resetProductForm();
+  renderProductList();
+}
+
+function editProduct(id) {
+  const prod = products.find(p => p.id === id);
+  if(prod) {
+      document.getElementById('editProductId').value = prod.id;
+      document.getElementById('pName').value = prod.name;
+      document.getElementById('pCompany').value = prod.company || '';
+      document.getElementById('pGeneric').value = prod.generic || '';
+      document.getElementById('pPcsPerBox').value = prod.pcsPerBox || 100;
+      
+      const pcsPerBox = prod.pcsPerBox || 1;
+      document.getElementById('pStockBox').value = Math.floor(prod.stock / pcsPerBox);
+      document.getElementById('pBoxMrp').value = (prod.mrp * pcsPerBox).toFixed(2);
+      document.getElementById('pBoxBuyPrice').value = (prod.buyPrice * pcsPerBox).toFixed(2);
+      document.getElementById('pExpDate').value = prod.exp || '';
+      
+      document.getElementById('formTitle').innerText = "প্রোডাক্ট আপডেট করুন";
+      document.getElementById('btnSaveProduct').innerText = "আপডেট করুন";
+  }
+}
+
+function resetProductForm() {
+  document.getElementById('editProductId').value = '';
+  document.getElementById('pName').value = '';
+  document.getElementById('pCompany').value = '';
+  document.getElementById('pGeneric').value = '';
+  document.getElementById('pPcsPerBox').value = '100';
+  document.getElementById('pStockBox').value = '';
+  document.getElementById('pBoxMrp').value = '';
+  document.getElementById('pBoxBuyPrice').value = '';
+  document.getElementById('pExpDate').value = '';
+
+  document.getElementById('formTitle').innerText = "নতুন প্রোডাক্ট যুক্ত করুন";
+  document.getElementById('btnSaveProduct').innerText = "স্টকে সেভ করুন";
+}
+
+function renderProductList() {
+    const tbody = document.getElementById('tblProductList');
+    tbody.innerHTML = '';
+    products.forEach(p => {
+        tbody.innerHTML += `
+        <tr>
+            <td><b>${p.name}</b><br><small style="color:#666">${p.company || ''}</small></td>
+            <td>${p.generic || '-'}</td>
+            <td><b>${p.stock}</b> পিস (${(p.stock / (p.pcsPerBox || 1)).toFixed(1)} বক্স)</td>
+            <td>৳${safeToFixed(p.mrp)}</td>
+            <td>
+                <button onclick="editProduct(${p.id})" style="background:#0288D1; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; margin-right:4px;">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button onclick="deleteProduct(${p.id})" style="background:#e53935; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        `;
+    });
+}
+
+function deleteProduct(id) {
+    if (confirm("আপনি কি নিশ্চিত যে এই প্রোডাক্টটি মুছে ফেলতে চান?")) {
+        products = products.filter(p => p.id !== id);
+        saveData();
+        renderProductList();
+    }
+}
+
+function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ products, customers, salesHistory }));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", "pharmacy_backup_" + new Date().toISOString().slice(0,10) + ".json");
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+}
+
+function importData(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+        try {
+            const data = JSON.parse(fileReader.result);
+            if(data.products) products = data.products;
+            if(data.customers) customers = data.customers;
+            if(data.salesHistory) salesHistory = data.salesHistory;
+            saveData();
+            alert("ডাটা সফলভাবে রিস্টোর করা হয়েছে!");
+            location.reload();
+        } catch(e) {
+            alert("ভুল ব্যাকআপ ফাইল সিলেক্ট করেছেন!");
+        }
+    };
+    fileReader.readAsText(event.target.files[0]);
+}
+
+// Search Medicine in POS
+function searchMedicineForPOS() {
+  const query = document.getElementById('medSearchInput').value.toLowerCase().trim();
+  const resDiv = document.getElementById('posSearchResults');
+  
+  if(!query) { resDiv.style.display = 'none'; return; }
+
+  const matches = products.filter(p => p.name.toLowerCase().includes(query) || (p.generic && p.generic.toLowerCase().includes(query)));
+  
+  if(matches.length === 0) {
+    resDiv.innerHTML = '<div style="color:#999;">কোন ওষুধ পাওয়া যায়নি</div>';
+    resDiv.style.display = 'block';
+    return;
+  }
+
+  resDiv.innerHTML = '';
+  matches.forEach(p => {
+    resDiv.innerHTML += `
+      <div onclick="addToCart(${p.id})">
+        <b>${p.name}</b> (${p.company || ''}) - Stock: ${p.stock} pcs - ৳${safeToFixed(p.mrp)}
+      </div>
+    `;
+  });
+  resDiv.style.display = 'block';
+}
+
+function addToCart(productId) {
+  const prod = products.find(p => p.id === productId);
+  if(!prod) return;
+
+  const exist = cart.find(item => item.id === productId);
+  if(exist) {
+    if(exist.qty < prod.stock) exist.qty++;
+    else alert("স্টকের বেশি যোগ করা সম্ভব নয়!");
+  } else {
+    if(prod.stock > 0) cart.push({ id: prod.id, name: prod.name, mrp: prod.mrp, buyPrice: prod.buyPrice, qty: 1 });
+    else alert("স্টক শেষ!");
+  }
+
+  document.getElementById('medSearchInput').value = '';
+  document.getElementById('posSearchResults').style.display = 'none';
+  renderCart();
+}
+
+function renderCart() {
+  const tbody = document.getElementById('tblCart');
+  tbody.innerHTML = '';
+
+  cart.forEach((item, index) => {
+    const total = item.mrp * item.qty;
+    tbody.innerHTML += `
+      <tr>
+        <td>${item.name}</td>
+        <td><input type="number" min="1" value="${item.qty}" style="width:50px;" onchange="updateCartQty(${index}, this.value)"></td>
+        <td>৳${safeToFixed(item.mrp)}</td>
+        <td>৳${safeToFixed(total)}</td>
+        <td><button onclick="removeFromCart(${index})" style="background:none; border:none; color:red; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button></td>
+      </tr>
+    `;
+  });
+
+  calculateTotals();
+}
+
+function updateCartQty(index, val) {
+  const qty = parseInt(val) || 1;
+  const prod = products.find(p => p.id === cart[index].id);
+  if(qty <= prod.stock) {
+    cart[index].qty = qty;
+  } else {
+    alert("স্টকের সীমাবদ্ধতার বেশি দেওয়া যাবে না!");
+    cart[index].qty = prod.stock;
+  }
+  renderCart();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+function calculateTotals() {
+  let subTotal = cart.reduce((acc, item) => acc + (item.mrp * item.qty), 0);
+  const discType = document.getElementById('discountType').value;
+  const discVal = parseFloat(document.getElementById('discountValue').value) || 0;
+  
+  let discAmt = 0;
+  if(discType === 'flat') discAmt = discVal;
+  else discAmt = (subTotal * discVal) / 100;
+
+  if(discAmt > subTotal) discAmt = subTotal;
+
+  const grandTotal = subTotal - discAmt;
+  const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+  const due = grandTotal - paid;
+
+  document.getElementById('cartSubTotal').innerText = safeToFixed(subTotal);
+  document.getElementById('discountAmount').innerText = safeToFixed(discAmt);
+  document.getElementById('cartGrandTotal').innerText = safeToFixed(grandTotal);
+  document.getElementById('dueAmount').value = safeToFixed(due > 0 ? due : 0);
+}
+
+function checkoutSale() {
+  if(cart.length === 0) { alert("কার্ট খালি!"); return; }
+
+  const invoice = document.getElementById('posInvoiceNo').value;
+  const custName = document.getElementById('posCustName').value || "সাধারণ কাস্টমার";
+  const custPhone = document.getElementById('posCustPhone').value || "-";
+  const subTotal = parseFloat(document.getElementById('cartSubTotal').innerText);
+  const discount = parseFloat(document.getElementById('discountAmount').innerText);
+  const grandTotal = parseFloat(document.getElementById('cartGrandTotal').innerText);
+  const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+  const due = parseFloat(document.getElementById('dueAmount').value) || 0;
+
+  let totalCost = 0;
+  cart.forEach(item => {
+    totalCost += (item.buyPrice * item.qty);
+    const p = products.find(prod => prod.id === item.id);
+    if(p) p.stock -= item.qty;
+  });
+
+  const netProfit = grandTotal - totalCost;
+
+  const saleRecord = {
+    invoice,
+    date: new Date().toLocaleString(),
+    custName,
+    custPhone,
+    items: [...cart],
+    subTotal,
+    discount,
+    grandTotal,
+    paid,
+    due,
+    profit: netProfit
+  };
+
+  salesHistory.push(saleRecord);
+
+  if(due > 0 && custName !== "সাধারণ কাস্টমার") {
+    let cust = customers.find(c => c.phone === custPhone);
+    if(cust) cust.due += due;
+    else customers.push({ id: Date.now(), name: custName, phone: custPhone, due: due, collected: 0 });
+  }
+
+  saveData();
+
+  // Populate Printable Receipt
+  document.getElementById('recInvoice').innerText = invoice;
+  document.getElementById('recDate').innerText = saleRecord.date;
+  document.getElementById('recCustName').innerText = custName;
+  document.getElementById('recCustPhone').innerText = custPhone;
+
+  let recItemsHTML = '';
+  cart.forEach(item => {
+    recItemsHTML += `<div style="display:flex; justify-content:space-between;"><span>${item.name} x${item.qty}</span><span>৳${safeToFixed(item.mrp * item.qty)}</span></div>`;
+  });
+  document.getElementById('recItems').innerHTML = recItemsHTML;
+  document.getElementById('recSubTotal').innerText = '৳' + safeToFixed(subTotal);
+  document.getElementById('recDiscount').innerText = '৳' + safeToFixed(discount);
+  document.getElementById('recGrandTotal').innerText = '৳' + safeToFixed(grandTotal);
+  document.getElementById('recPaid').innerText = '৳' + safeToFixed(paid);
+  document.getElementById('recDue').innerText = '৳' + safeToFixed(due);
+
+  window.print();
+
+  cart = [];
+  renderCart();
+  initPOS();
+  document.getElementById('posCustName').value = '';
+  document.getElementById('posCustPhone').value = '';
+  document.getElementById('paidAmount').value = '';
+  alert("বিক্রি সফলভাবে সংরক্ষিত ও মেমো জেনারেট হয়েছে!");
+}
+
+function renderGenericSearch() {
+  const query = document.getElementById('productSearchInput').value.toLowerCase().trim();
+  const searchType = document.getElementById('searchType').value;
+  const container = document.getElementById('appProductCardsContainer');
+
+  let filtered = products;
+  if(query) {
+    filtered = products.filter(p => {
+      if(searchType === 'generic') return p.generic && p.generic.toLowerCase().includes(query);
+      if(searchType === 'company') return p.company && p.company.toLowerCase().includes(query);
+      return p.name.toLowerCase().includes(query);
+    });
+  }
+
+  document.getElementById('totalProductCount').innerText = filtered.length;
+  container.innerHTML = '';
+
+  filtered.forEach(p => {
+    container.innerHTML += `
+      <div class="data-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h4 style="margin:0; color:var(--primary-color);">${p.name}</h4>
+            <div style="font-size:12px; color:#555;">${p.company || 'N/A'} | Generic: <b>${p.generic || 'N/A'}</b></div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:14px; font-weight:bold;">৳${safeToFixed(p.mrp)}</span>
+            <div style="font-size:11px; color:${p.stock > 10 ? 'green' : 'red'};">Stock: ${p.stock} pcs</div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function addCustomer() {
+  const name = document.getElementById('cName').value;
+  const phone = document.getElementById('cPhone').value;
+  const due = parseFloat(document.getElementById('cDue').value) || 0;
+
+  if(!name) { alert("কাস্টমারের নাম দিন!"); return; }
+
+  customers.push({ id: Date.now(), name, phone, due, collected: 0 });
+  saveData();
+  document.getElementById('cName').value = '';
+  document.getElementById('cPhone').value = '';
+  document.getElementById('cDue').value = '';
+  renderCustomers();
+}
+
+function renderCustomers() {
+  const tbody = document.getElementById('tblCustomers');
+  tbody.innerHTML = '';
+
+  let totalDue = 0, totalCol = 0;
+
+  customers.forEach((c, idx) => {
+    totalDue += c.due;
+    totalCol += (c.collected || 0);
+
+    tbody.innerHTML += `
+      <tr>
+        <td><b>${c.name}</b><br><small>${c.phone}</small></td>
+        <td style="color:#d32f2f; font-weight:bold;">৳${safeToFixed(c.due)}</td>
+        <td>
+          <input type="number" id="payInput_${idx}" placeholder="টাকা" style="width:70px; display:inline;">
+          <button onclick="collectCustomerDue(${idx})" style="background:green; color:white; border:none; border-radius:4px; padding:4px 6px; cursor:pointer;"><i class="fa-solid fa-check"></i></button>
+        </td>
+        <td>
+          <button onclick="deleteCustomer(${c.id})" style="background:red; color:white; border:none; border-radius:4px; padding:4px 6px; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('totalDueText').innerText = '৳' + safeToFixed(totalDue);
+  document.getElementById('totalPaidCollection').innerText = '৳' + safeToFixed(totalCol);
+}
+
+function collectCustomerDue(idx) {
+  const payVal = parseFloat(document.getElementById(`payInput_${idx}`).value) || 0;
+  if(payVal <= 0) return;
+
+  if(payVal > customers[idx].due) {
+    alert("বকেয়ার চেয়ে বেশি টাকা নেওয়া সম্ভব নয়!");
+    return;
+  }
+
+  customers[idx].due -= payVal;
+  customers[idx].collected = (customers[idx].collected || 0) + payVal;
+  saveData();
+  renderCustomers();
+  alert("জমা সফলভাবে গৃহীত হয়েছে!");
+}
+
+function deleteCustomer(id) {
+  if(confirm("কাস্টমার ডিলিট করতে চান?")) {
+    customers = customers.filter(c => c.id !== id);
+    saveData();
+    renderCustomers();
+  }
+}
+
+function renderSalesRecord() {
+  const tbody = document.getElementById('tblSaleRecords');
+  tbody.innerHTML = '';
+
+  let totalSales = 0, totalProfit = 0;
+
+  salesHistory.forEach((s) => {
+    totalSales += s.grandTotal;
+    totalProfit += s.profit;
+
+    tbody.innerHTML += `
+      <tr>
+        <td><b>${s.invoice}</b><br><small>${s.date}</small></td>
+        <td>${s.custName}</td>
+        <td>৳${safeToFixed(s.grandTotal)}</td>
+        <td style="color:green; font-weight:bold;">৳${safeToFixed(s.profit)}</td>
+        <td>
+          <button onclick="reprintReceipt('${s.invoice}')" style="background:#0288D1; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;"><i class="fa-solid fa-print"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('totalSalesAmount').innerText = '৳' + safeToFixed(totalSales);
+  document.getElementById('totalProfitAmount').innerText = '৳' + safeToFixed(totalProfit);
+}
+
+function reprintReceipt(invoiceNo) {
+  const s = salesHistory.find(item => item.invoice === invoiceNo);
+  if(!s) return;
+
+  document.getElementById('recInvoice').innerText = s.invoice;
+  document.getElementById('recDate').innerText = s.date;
+  document.getElementById('recCustName').innerText = s.custName;
+  document.getElementById('recCustPhone').innerText = s.custPhone;
+
+  let recItemsHTML = '';
+  s.items.forEach(item => {
+    recItemsHTML += `<div style="display:flex; justify-content:space-between;"><span>${item.name} x${item.qty}</span><span>৳${safeToFixed(item.mrp * item.qty)}</span></div>`;
+  });
+  document.getElementById('recItems').innerHTML = recItemsHTML;
+  document.getElementById('recSubTotal').innerText = '৳' + safeToFixed(s.subTotal);
+  document.getElementById('recDiscount').innerText = '৳' + safeToFixed(s.discount);
+  document.getElementById('recGrandTotal').innerText = '৳' + safeToFixed(s.grandTotal);
+  document.getElementById('recPaid').innerText = '৳' + safeToFixed(s.paid);
+  document.getElementById('recDue').innerText = '৳' + safeToFixed(s.due);
+
+  window.print();
+}
+
+function renderShortItems() {
+  const tbody = document.getElementById('tblShortItems');
+  tbody.innerHTML = '';
+
+  const shorts = products.filter(p => p.stock <= 20);
+  shorts.forEach(p => {
+    tbody.innerHTML += `
+      <tr>
+        <td><b>${p.name}</b> (${p.company || '-'})</td>
+        <td style="color:red; font-weight:bold;">${p.stock} পিস</td>
+      </tr>
+    `;
+  });
+}
+
+function renderExpiredItems() {
+  const tbody = document.getElementById('tblExpiredItems');
+  tbody.innerHTML = '';
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const expired = products.filter(p => p.exp && p.exp <= todayStr);
+
+  expired.forEach(p => {
+    tbody.innerHTML += `
+      <tr>
+        <td><b>${p.name}</b> (${p.company || '-'})</td>
+        <td style="color:red; font-weight:bold;">${p.exp}</td>
+      </tr>
+    `;
+  });
+}
+
+// AI Invoice Scan Functions
+async function analyzeInvoiceWithGeminiAI() {
+  const fileInput = document.getElementById('invoiceFileInput');
+  if(!fileInput.files.length) { alert("ছবি সিলেক্ট করুন!"); return; }
+
+  const apiKey = getStoredApiKey();
+  if(!apiKey) {
+    alert("Gemini API Key দেওয়া নেই! অনুগ্রহ করে সেট করুন।");
+    toggleKeyBox();
+    return;
+  }
+
+  document.getElementById('aiLoading').style.display = 'block';
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async function() {
+    const base64Data = reader.result.split(',')[1];
+    
+    const promptText = `
+      Analyze this invoice image and extract medicine items in raw JSON format. 
+      Array of objects with keys: "name", "company", "generic", "boxQty", "pcsPerBox", "boxBuyPrice", "boxMrp", "exp".
+      Return only JSON array string.
+    `;
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: promptText },
+              { inline_data: { mime_type: file.type, data: base64Data } }
+            ]
+          }]
+        })
+      });
+
+      const resData = await response.json();
+      document.getElementById('aiLoading').style.display = 'none';
+
+      if(resData.candidates && resData.candidates[0].content) {
+        let text = resData.candidates[0].content.parts[0].text;
+        text = text.replace(/```json|```/g, '').trim();
+        const scannedItems = JSON.parse(text);
+        renderScannedItems(scannedItems);
+      } else {
+        alert("AI বিশ্লেষণ করতে ব্যর্থ হয়েছে!");
+      }
+    } catch(err) {
+      document.getElementById('aiLoading').style.display = 'none';
+      alert("Error: " + err.message);
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function renderScannedItems(items) {
+  const tbody = document.getElementById('tblScannedItems');
+  tbody.innerHTML = '';
+
+  items.forEach((item, idx) => {
+    tbody.innerHTML += `
+      <tr>
+        <td><input type="text" class="scanned-input" value="${item.name || ''}" id="scName_${idx}"></td>
+        <td><input type="text" class="scanned-input" value="${item.company || ''}" id="scComp_${idx}"></td>
+        <td><input type="text" class="scanned-input" value="${item.generic || ''}" id="scGen_${idx}"></td>
+        <td><input type="number" class="scanned-input" value="${item.boxQty || 1}" id="scBoxQty_${idx}"></td>
+        <td><input type="number" class="scanned-input" value="${item.pcsPerBox || 100}" id="scPcsBox_${idx}"></td>
+        <td><input type="number" class="scanned-input" value="${item.boxBuyPrice || 0}" id="scBuy_${idx}"></td>
+        <td><input type="number" class="scanned-input" value="${item.boxMrp || 0}" id="scMrp_${idx}"></td>
+        <td><input type="text" class="scanned-input" value="${item.exp || ''}" id="scExp_${idx}"></td>
+        <td><button onclick="this.parentElement.parentElement.remove()" style="background:red; color:white; border:none; padding:4px;"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('aiResultCard').style.display = 'block';
+}
+
+function addAllScannedToStock() {
+  const tbody = document.getElementById('tblScannedItems');
+  const rows = tbody.querySelectorAll('tr');
+
+  rows.forEach((row, idx) => {
+    const name = document.getElementById(`scName_${idx}`)?.value;
+    if(name) {
+      const company = document.getElementById(`scComp_${idx}`).value;
+      const generic = document.getElementById(`scGen_${idx}`).value;
+      const boxQty = parseInt(document.getElementById(`scBoxQty_${idx}`).value) || 1;
+      const pcsPerBox = parseInt(document.getElementById(`scPcsBox_${idx}`).value) || 100;
+      const boxBuy = parseFloat(document.getElementById(`scBuy_${idx}`).value) || 0;
+      const boxMrp = parseFloat(document.getElementById(`scMrp_${idx}`).value) || 0;
+      const exp = document.getElementById(`scExp_${idx}`).value;
+
+      const totalPcs = boxQty * pcsPerBox;
+      const unitBuy = boxBuy / pcsPerBox;
+      const unitMrp = boxMrp / pcsPerBox;
+
+      products.push({
+        id: Date.now() + idx,
+        name,
+        company,
+        generic,
+        pcsPerBox,
+        stock: totalPcs,
+        buyPrice: unitBuy,
+        mrp: unitMrp,
+        exp
+      });
+    }
+  });
+
+  saveData();
+  alert("স্ক্যানকৃত আইটেম স্টকে যুক্ত হয়েছে!");
+  document.getElementById('aiResultCard').style.display = 'none';
+}
+
+// AI Prescription Reader
+function previewPrescriptionImage(event) {
+  const reader = new FileReader();
+  reader.onload = function(){
+    const output = document.getElementById('prescriptionImgPreview');
+    output.src = reader.result;
+    document.getElementById('prescriptionPreviewContainer').style.display = 'block';
+  };
+  reader.readAsDataURL(event.target.files[0]);
+}
+
+async function analyzePrescriptionWithAI() {
+  const fileInput = document.getElementById('prescriptionFileInput');
+  if(!fileInput.files.length) { alert("ছবি নির্বাচন করুন!"); return; }
+
+  const apiKey = getStoredApiKey();
+  if(!apiKey) { alert("Gemini API Key পাওয়া যায়নি!"); toggleKeyBox(); return; }
+
+  document.getElementById('prescriptionLoading').style.display = 'block';
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async function() {
+    const base64Data = reader.result.split(',')[1];
+    
+    const promptText = `
+      Analyze this medical prescription image. Read medicines prescribed and output JSON array of objects: 
+      [{"name": "Medicine Name", "dosage": "Dosage instructions"}]
+      Provide raw JSON string only.
+    `;
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: promptText },
+              { inline_data: { mime_type: file.type, data: base64Data } }
+            ]
+          }]
+        })
+      });
+
+      const resData = await response.json();
+      document.getElementById('prescriptionLoading').style.display = 'none';
+
+      if(resData.candidates && resData.candidates[0].content) {
+        let text = resData.candidates[0].content.parts[0].text;
+        text = text.replace(/```json|```/g, '').trim();
+        const results = JSON.parse(text);
+        renderPrescriptionResults(results);
+      } else {
+        alert("প্রেসক্রিপশন পড়তে ব্যর্থ হয়েছে!");
+      }
+    } catch(err) {
+      document.getElementById('prescriptionLoading').style.display = 'none';
+      alert("Error: " + err.message);
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function renderPrescriptionResults(items) {
+  const tbody = document.getElementById('tblPrescriptionResults');
+  tbody.innerHTML = '';
+
+  items.forEach(item => {
+    const matched = products.find(p => p.name.toLowerCase().includes(item.name.toLowerCase()));
+    
+    let statusHTML = '<span style="color:red; font-weight:bold;">স্টকে নেই</span>';
+    let stockCount = '0 পিস';
+
+    if(matched) {
+      if(matched.stock > 0) {
+        statusHTML = '<span style="color:green; font-weight:bold;">স্টকে আছে</span>';
+        stockCount = `${matched.stock} পিস`;
+      } else {
+        statusHTML = '<span style="color:orange; font-weight:bold;">স্টক শেষ</span>';
+      }
+    }
+
+    tbody.innerHTML += `
+      <tr>
+        <td><b>${item.name}</b></td>
+        <td>${item.dosage || '-'}</td>
+        <td>${statusHTML}</td>
+        <td>${stockCount}</td>
+      </tr>
+    `;
+  });
+
+ document.getElementById('prescriptionResultCard').style.display = 'block';
+}
+
+// Initial script execution
+updateBadges();
+
+// অ্যাপ ওপেন হলেই ফায়ারবেসের রিয়েল-টাইম ডাটা সিঙ্ক চালু হবে
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(listenToCloudUpdates, 500);
+});
+</script>
+</body>
+</html>
