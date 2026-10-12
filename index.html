@@ -1106,4 +1106,832 @@
         }
     </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sardar Medical Hall - Smart AI Pharmacy</title>
+    
+    <!-- PWA Primary Meta Tags -->
+    <meta name="theme-color" content="#e53935">
+    <meta name="description" content="Sardar Medical Hall - Smart AI Powered Pharmacy Management System">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sardar Pharmacy">
+    
+    <!-- Dynamic Manifest File Data URI -->
+    <link rel="manifest" id="manifestPlaceholder">
+    <link rel="icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/notes-medical.svg">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <!-- HTML5 QR Code / Barcode Scanner SDK -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- Chart.js for Monthly Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #e53935;
+            --bg-white: #ffffff;
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+            --text-muted: #777777;
+            --border-light: #f0f0f0;
+            --pink-bg: #fde8e8;
+            --blue-bg: #e1f5fe;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f9fa;
+            color: var(--text-dark);
+            margin: 0; padding: 0;
+            padding-bottom: 75px;
+        }
+
+        .app-header {
+            background-color: var(--bg-white);
+            padding: 12px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .store-info { display: flex; align-items: center; gap: 12px; }
+        .store-logo {
+            width: 42px; height: 42px; background: var(--primary-color);
+            color: white; border-radius: 10px; display: flex;
+            align-items: center; justify-content: center; font-size: 22px;
+        }
+
+        .store-title { font-size: 16px; font-weight: 700; color: var(--primary-color); margin: 0; }
+        .store-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        
+        .btn-install-app {
+            background: #2e7d32; color: white; border: none; padding: 7px 12px;
+            border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(46,125,50,0.3);
+        }
+
+        .container { padding: 15px; max-width: 650px; margin: 0 auto; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        .grid-menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .menu-card {
+            background: var(--card-bg); border: 1px solid var(--border-light);
+            border-radius: 16px; padding: 18px 10px 14px 10px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); cursor: pointer; position: relative;
+        }
+
+        .menu-card .icon-box { font-size: 26px; color: var(--primary-color); margin-bottom: 8px; }
+        .menu-card .title { font-weight: 600; font-size: 12px; color: var(--text-dark); }
+
+        .badge-count {
+            position: absolute; top: 8px; right: 10px;
+            background: var(--primary-color); color: white;
+            font-size: 10px; padding: 2px 6px; border-radius: 12px; font-weight: bold;
+        }
+
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .btn-back {
+            background: #ffffff; border: none; width: 35px; height: 35px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .cust-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .cust-stat-card { padding: 15px; border-radius: 12px; text-align: center; }
+        .cust-stat-card.pink { background-color: var(--pink-bg); }
+        .cust-stat-card.blue { background-color: var(--blue-bg); }
+        .cust-stat-card .amount { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+        .cust-stat-card.pink .amount { color: #d32f2f; }
+        .cust-stat-card.blue .amount { color: #0288d1; }
+        .cust-stat-card .label { font-size: 11px; color: #666; font-weight: 500; }
+
+        .cust-card-list { display: flex; flex-direction: column; gap: 10px; }
+        .cust-card {
+            background: #fff; border-radius: 12px; padding: 14px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02); border: 1px solid #f0f0f0;
+        }
+        .cust-info .name { font-weight: bold; font-size: 14px; color: #333; margin-bottom: 4px; text-transform: uppercase; }
+        .cust-info .phone { font-size: 12px; color: #888; }
+        .cust-balance { text-align: right; }
+        .cust-balance .bal-amount { font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+        .cust-balance .bal-type { font-size: 11px; font-weight: bold; }
+        .cust-balance .bal-type.due { color: #e53935; }
+
+        .btn-fab {
+            position: fixed; bottom: 85px; right: 20px;
+            background: var(--primary-color); color: white; width: 48px; height: 48px;
+            border-radius: 14px; border: none; display: flex; align-items: center;
+            justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(229,57,53,0.3);
+            cursor: pointer; z-index: 99;
+        }
+
+        .data-card {
+            background: white; border: 1px solid var(--border-light);
+            border-radius: 14px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-top: 10px;
+        }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 10px; }
+        input, select {
+            width: 100%; padding: 10px 12px; border-radius: 8px;
+            border: 1px solid #e0e0e0; font-size: 13px; box-sizing: border-box; background: #fafafa; outline: none;
+        }
+
+        button.btn-submit {
+            background: var(--primary-color); color: white; border: none;
+            padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--border-light); font-size: 12px; }
+        th { color: var(--text-muted); font-weight: 600; background: #fafafa; }
+
+        .search-results {
+            background: #fff; border: 1px solid #ddd; border-radius: 8px;
+            max-height: 180px; overflow-y: auto; margin-top: 5px; display: none;
+        }
+        .search-item {
+            padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; font-size: 13px;
+        }
+
+        .generic-card {
+            background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px; margin-bottom: 10px;
+        }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #ffffff; display: flex; justify-content: space-around;
+            padding: 10px 0 6px 0; border-top: 1px solid var(--border-light); z-index: 1000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: #999; font-size: 11px; cursor: pointer; background: none; border: none; width: 20%;
+        }
+        .nav-item.active { color: var(--primary-color); font-weight: 600; }
+        .loading { display: none; text-align: center; font-weight: bold; color: var(--primary-color); padding: 15px; }
+
+        .scan-input { padding: 4px 6px; font-size: 11px; border: 1px solid #ccc; border-radius: 4px; background: #fff; width: 100%; box-sizing: border-box; }
+
+        /* Thermal Printing CSS */
+        @media print {
+            body * { visibility: hidden; }
+            #printableReceipt, #printableReceipt * { visibility: visible; }
+            #printableReceipt {
+                position: absolute; left: 0; top: 0; width: 58mm; padding: 5px; font-family: monospace; font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <div class="store-info">
+            <div class="store-logo"><i class="fa-solid fa-notes-medical"></i></div>
+            <div>
+                <p class="store-title">সরদার মেডিকেল হল</p>
+                <p class="store-subtitle">স্মার্ট AI চালিত ফার্মেসি</p>
+            </div>
+        </div>
+        <button id="pwaInstallBtn" class="btn-install-app" style="display:none;" onclick="installPWAApp()">
+            <i class="fa-solid fa-download"></i> ইনস্টল অ্যাপ
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- HOME SECTION -->
+        <div id="sec-home" class="page-section active">
+            <div class="grid-menu">
+                <div class="menu-card" onclick="openSection('sec-sale')">
+                    <div class="icon-box"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="title">POS / Sale</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-generics')">
+                    <div class="icon-box"><i class="fa-solid fa-dna"></i></div>
+                    <div class="title">Generics</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-customers')">
+                    <div class="icon-box"><i class="fa-solid fa-users"></i></div>
+                    <div class="title">Customer Due</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-suppliers')">
+                    <div class="icon-box"><i class="fa-solid fa-truck-field"></i></div>
+                    <div class="title">Supplier Tali</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-product-list')">
+                    <div class="icon-box"><i class="fa-solid fa-list"></i></div>
+                    <div class="title">Product List</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-expenses')">
+                    <div class="icon-box"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="title">Shop Expenses</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-sale-record')">
+                    <div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="title">Analytics & Profit</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-purchase')">
+                    <div class="icon-box"><i class="fa-solid fa-bag-shopping"></i></div>
+                    <div class="title">Purchase</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-short-items')">
+                    <span class="badge-count" id="badgeShortCount">0</span>
+                    <div class="icon-box"><i class="fa-solid fa-box-open"></i></div>
+                    <div class="title">Short Items</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-expired')">
+                    <span class="badge-count" id="badgeExpiredCount">0</span>
+                    <div class="icon-box"><i class="fa-solid fa-calendar-xmark"></i></div>
+                    <div class="title">Expired</div>
+                </div>
+                <div class="menu-card" onclick="openSection('sec-ai-scan')">
+                    <div class="icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <div class="title">AI Invoice Scan</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- POS / SALE SECTION (WITH BARCODE SCANNER & THERMAL PRINT) -->
+        <div id="sec-sale" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">স্মার্ট বিলিং (POS)</h3>
+                <button class="btn-submit" style="background:#0288d1; font-size:11px;" onclick="startBarcodeScanner()"><i class="fa-solid fa-barcode"></i> Scan Barcode</button>
+            </div>
+
+            <!-- Barcode Scanner Modal UI -->
+            <div id="barcodeReaderContainer" style="display:none; background:#fff; padding:10px; border-radius:10px; margin-bottom:10px;">
+                <div id="reader" style="width:100%;"></div>
+                <button class="btn-submit" style="background:#e53935; width:100%; margin-top:5px;" onclick="stopBarcodeScanner()">স্ক্যানার বন্ধ করুন</button>
+            </div>
+
+            <div class="data-card">
+                <div style="position:relative;">
+                    <input type="text" id="medSearchInput" placeholder="🔍 ওষুধের নাম বা বারকোড দিয়ে খুঁজুন..." oninput="searchMedicine()">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+
+                <div id="selectedItemBar" style="display:none; margin-top:12px; background:#f0f7ff; padding:10px; border-radius:8px;">
+                    <p style="margin:0 0 8px 0; font-weight:bold; font-size:13px;" id="selectedMedName"></p>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="number" id="saleQty" value="1" min="1" placeholder="পিস" style="width:100px;">
+                        <button class="btn-submit" style="flex:1;" onclick="addSelectedToCart()">কার্টে যোগ করুন</button>
+                    </div>
+                </div>
+
+                <table style="margin-top:15px;">
+                    <thead>
+                        <tr><th>আইটেম</th><th>পরিমাণ</th><th>MRP</th><th>মোট</th><th>অ্যাকশন</th></tr>
+                    </thead>
+                    <tbody id="tblCart"></tbody>
+                </table>
+
+                <div style="margin-top: 15px; background: #fafafa; padding: 12px; border-radius: 8px;">
+                    <div style="display:flex; justify-content:space-between; font-size: 13px; margin-bottom:5px;">
+                        <span>সাব-টোটাল:</span> <span>৳<span id="cartSubTotal">0.00</span></span>
+                    </div>
+
+                    <div style="display:flex; gap:10px; align-items:center; margin:8px 0;">
+                        <input type="number" id="discountValue" placeholder="ডিসকাউন্ট" oninput="calculateFinalTotal()" style="flex:1;">
+                        <select id="discountType" onchange="calculateFinalTotal()" style="width:110px;">
+                            <option value="flat">৳ (ফ্ল্যাট)</option>
+                            <option value="percent">% (পার্সেন্ট)</option>
+                        </select>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size: 16px; font-weight: bold; color: var(--primary-color); margin:10px 0; background:#ffebee; padding:8px 10px; border-radius:6px;">
+                        <span>সর্বমোট বিল:</span> <span>৳<span id="cartGrandTotal">0.00</span></span>
+                    </div>
+
+                    <div style="border-top:1px dashed #ccc; padding-top:8px; margin-top:8px;">
+                        <p style="margin:0 0 5px 0; font-weight:bold; font-size:12px; color:#555;">কাস্টমার তথ্য ও জমা:</p>
+                        <div class="form-grid">
+                            <input type="text" id="custName" placeholder="কাস্টমারের নাম">
+                            <input type="text" id="custPhone" placeholder="মোবাইল নম্বর">
+                            <input type="number" id="custPaid" placeholder="জমা টাকা" oninput="calculateFinalTotal()">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size: 13px; font-weight: bold; color: #d32f2f; margin-top:6px;">
+                        <span>বকেয়া:</span> <span>৳<span id="cartDueTotal">0.00</span></span>
+                    </div>
+
+                    <button class="btn-submit" style="width: 100%; margin-top: 12px; background:#2e7d32;" onclick="completeSaleAndPrint()">পেমেন্ট সেভ ও রসিদ প্রিন্ট করুন</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIDDEN PRINTABLE THERMAL RECEIPT CONTAINER -->
+        <div id="printableReceipt" style="display:none;">
+            <div style="text-align:center;">
+                <h3 style="margin:0;">সরদার মেডিকেল হল</h3>
+                <p style="margin:2px 0;">স্মার্ট AI চালিত ফার্মেসি</p>
+                <p style="margin:2px 0;" id="printDate"></p>
+                <p style="margin:2px 0;">--------------------------------</p>
+            </div>
+            <p style="margin:2px 0;" id="printCust"></p>
+            <p style="margin:2px 0;">--------------------------------</p>
+            <div id="printItems"></div>
+            <p style="margin:2px 0;">--------------------------------</p>
+            <p style="margin:2px 0; display:flex; justify-content:space-between;"><span>মোট বিল:</span> <span id="printGrand"></span></p>
+            <p style="margin:2px 0; display:flex; justify-content:space-between;"><span>জমা:</span> <span id="printPaid"></span></p>
+            <p style="margin:2px 0; display:flex; justify-content:space-between;"><span>বকেয়া:</span> <span id="printDue"></span></p>
+            <div style="text-align:center; margin-top:10px;">
+                <p style="margin:0;">ধন্যবাদ! আবার আসবেন।</p>
+            </div>
+        </div>
+
+        <!-- SUPPLIER LEDGER SECTION -->
+        <div id="sec-suppliers" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">Supplier / কোম্পানির খাতাপত্র</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <p style="font-weight:bold; margin-top:0;">কোম্পানির নতুন লেনদেন জমা দিন</p>
+                <div class="form-grid">
+                    <input type="text" id="supName" placeholder="কোম্পানির নাম (যেমন: Square)">
+                    <input type="number" id="supBill" placeholder="মোট চালানের বিল (৳)">
+                    <input type="number" id="supPaid" placeholder="পরিশোধিত টাকা (৳)">
+                    <button class="btn-submit" onclick="addSupplierTransaction()">হিসাব সেভ করুন</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>কোম্পানি</th><th>মোট বিল</th><th>জমা</th><th>বকেয়া</th></tr>
+                    </thead>
+                    <tbody id="tblSuppliers"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SHOP EXPENSES SECTION -->
+        <div id="sec-expenses" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">দোকানের অন্যান্য খরচ</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <div class="form-grid">
+                    <input type="text" id="expTitle" placeholder="খরচের বিবরণ (যেমন: কারেন্ট বিল)">
+                    <input type="number" id="expAmount" placeholder="টাকা (৳)">
+                    <button class="btn-submit" onclick="addExpense()">খরচ যোগ করুন</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>তারিখ</th><th>বিবরণ</th><th>টাকা</th></tr>
+                    </thead>
+                    <tbody id="tblExpenses"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ANALYTICS & PROFIT REPORT SECTION -->
+        <div id="sec-sale-record" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">Monthly Analytics & Net Profit</h3>
+                <div></div>
+            </div>
+
+            <div class="cust-summary-grid">
+                <div class="cust-stat-card blue">
+                    <div class="label">আজকের মোট বিক্রি</div>
+                    <div class="amount">৳ <span id="todaySale">0.00</span></div>
+                </div>
+                <div class="cust-stat-card pink">
+                    <div class="label">আজকের নিট লাভ</div>
+                    <div class="amount" style="color:#2e7d32;">৳ <span id="todayNetProfit">0.00</span></div>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <h4 style="margin:0 0 10px 0;">মাসিক বিক্রির গ্রাফ চিত্র</h4>
+                <canvas id="monthlySalesChart" style="width:100%; max-height:220px;"></canvas>
+            </div>
+        </div>
+
+        <!-- GENERICS SEARCH SECTION -->
+        <div id="sec-generics" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">Generics Search</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <input type="text" id="genericSearchInput" placeholder="🔍 জেনেরিক নাম লিখুন (যেমন: Omeprazole)..." oninput="searchGenerics()">
+            </div>
+            <div id="genericResultContainer" style="margin-top:15px;"></div>
+        </div>
+
+        <!-- CUSTOMER UI -->
+        <div id="sec-customers" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3 style="margin:0; font-size:18px;">Customer Due Ledger</h3>
+                <div></div>
+            </div>
+            <div id="customerCardContainer" class="cust-card-list"></div>
+            <button class="btn-fab" onclick="addNewCustomerManual()"><i class="fa-solid fa-user-plus"></i></button>
+        </div>
+
+        <!-- PRODUCT LIST SECTION -->
+        <div id="sec-product-list" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">Product List</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <div class="form-grid">
+                    <input type="text" id="pName" placeholder="ওষুধের নাম">
+                    <input type="text" id="pCompany" placeholder="কোম্পানি">
+                    <input type="text" id="pGeneric" placeholder="জেনেরিক">
+                    <input type="text" id="pBarcode" placeholder="বারকোড (Scan/Type)">
+                    <input type="number" id="pStock" placeholder="স্টক">
+                    <input type="number" id="pBuyPrice" placeholder="ক্রয় মূল্য">
+                    <input type="number" id="pSellPrice" placeholder="MRP">
+                    <input type="date" id="pExpDate">
+                    <button class="btn-submit" onclick="addProduct()">Save</button>
+                </div>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>নাম</th><th>বারকোড</th><th>স্টক</th><th>MRP</th></tr>
+                    </thead>
+                    <tbody id="tblProductList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SHORT ITEMS SECTION -->
+        <div id="sec-short-items" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">Short Items List</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>আইটেম</th><th>বর্তমান স্টক</th></tr>
+                    </thead>
+                    <tbody id="tblShortItems"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- EXPIRED SECTION -->
+        <div id="sec-expired" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">Expired Items</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>আইটেম</th><th>মেয়াদ শেষ</th></tr>
+                    </thead>
+                    <tbody id="tblExpiredItems"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- GEMINI AI INVOICE SCANNER SECTION -->
+        <div id="sec-ai-scan" class="page-section">
+            <div class="section-header">
+                <button class="btn-back" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i></button>
+                <h3 style="margin:0;">🤖 AI চালানের আইটেম স্ক্যানার</h3>
+                <div></div>
+            </div>
+            <div class="data-card">
+                <label style="font-size:12px; font-weight:bold; color:#555;">কোম্পানির চালানের ছবি আপলোড করুন:</label>
+                <input type="file" id="invoiceFileInput" accept="image/*" style="margin-top:8px;">
+                <button class="btn-submit" style="width:100%; margin-top:12px; background:#1976d2;" onclick="analyzeInvoiceWithGeminiAI()">
+                    <i class="fa-solid fa-microchip"></i> Gemini AI দিয়ে চালান প্রসেস করুন
+                </button>
+            </div>
+
+            <div id="aiLoading" class="loading">
+                <i class="fa-solid fa-spinner fa-spin"></i> <span>AI ইনভয়েস স্ক্যান করছে এবং তথ্য প্রসেস করছে...</span>
+            </div>
+
+            <div id="aiResultCard" class="data-card" style="display:none; overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ওষুধের নাম</th><th>কোম্পানি</th><th>পরিমাণ</th><th>কেনা দাম</th><th>MRP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblScannedItems"></tbody>
+                </table>
+                <button class="btn-submit" style="width:100%; margin-top:15px; background:#2e7d32;" onclick="saveScannedItemsToStock()">সব ওষুধ স্টকে যোগ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="goHome(this)"><i class="fa-solid fa-house"></i> Home</button>
+        <button class="nav-item" onclick="openSection('sec-sale', this)"><i class="fa-solid fa-cart-shopping"></i> POS</button>
+        <button class="nav-item" onclick="openSection('sec-generics', this)"><i class="fa-solid fa-dna"></i> Generics</button>
+        <button class="nav-item" onclick="openSection('sec-customers', this)"><i class="fa-solid fa-users"></i> Due</button>
+        <button class="nav-item" onclick="openSection('sec-product-list', this)"><i class="fa-solid fa-box"></i> Stock</button>
+    </div>
+
+    <script>
+        /* DYNAMIC PWA MANIFEST INJECTION */
+        const manifestData = {
+            "name": "Sardar Medical Hall",
+            "short_name": "Sardar Pharmacy",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#e53935",
+            "description": "Smart AI Pharmacy Management System",
+            "icons": [{
+                "src": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/notes-medical.svg",
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+            }]
+        };
+        const stringManifest = JSON.stringify(manifestData);
+        const blobManifest = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blobManifest);
+        document.getElementById('manifestPlaceholder').setAttribute('href', manifestURL);
+
+        /* PWA INSTALLATION PROMPT HANDLER */
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('pwaInstallBtn');
+            if(installBtn) installBtn.style.display = 'flex';
+        });
+
+        function installPWAApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('pwaInstallBtn').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // Firebase Setup
+        const firebaseConfig = { databaseURL: "https://sarder-medical-default-rtdb.firebaseio.com/" };
+        firebase.initializeApp(firebaseConfig);
+        const dbRef = firebase.database().ref('sardar_pharmacy');
+
+        const GEMINI_API_KEY = "AQ.Ab8RN6Jc-JP6pxaTAYvoqO4gRBihjDvve9L1OHMtn8uJv9gYMw";
+
+        let products = [
+            { name: "Seclo 20mg", company: "Square", generic: "Omeprazole", barcode: "89012345", stock: 120, buyPrice: 5.20, sellPrice: 6.00, exp: "2026-10-10" },
+            { name: "Napa 500mg", company: "Beximco", generic: "Paracetamol", barcode: "89054321", stock: 200, buyPrice: 1.00, sellPrice: 1.20, exp: "2026-08-15" }
+        ];
+
+        let sales = [];
+        let customers = [];
+        let suppliers = [];
+        let expenses = [];
+        let cart = [];
+        let selectedProductIndex = null;
+        let html5QrcodeScanner = null;
+
+        // Firebase Sync Listener
+        dbRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                if (data.products) products = data.products;
+                if (data.sales) sales = data.sales;
+                if (data.customers) customers = data.customers;
+                if (data.suppliers) suppliers = data.suppliers;
+                if (data.expenses) expenses = data.expenses;
+                refreshUI();
+            }
+        });
+
+        function saveData() {
+            dbRef.set({
+                products, sales, customers, suppliers, expenses
+            });
+            refreshUI();
+        }
+
+        function openSection(secId, btnElem) {
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+            const targetSec = document.getElementById(secId);
+            if(targetSec) targetSec.classList.add('active');
+
+            if(secId === 'sec-sale-record') renderSalesChart();
+        }
+
+        function goHome(btnElem) { openSection('sec-home'); }
+
+        /* BARCODE / QR CODE SCANNER LOGIC */
+        function startBarcodeScanner() {
+            document.getElementById('barcodeReaderContainer').style.display = 'block';
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    stopBarcodeScanner();
+                    const match = products.find(p => p.barcode === decodedText);
+                    if(match) {
+                        selectMedicineForCart(products.indexOf(match));
+                        addSelectedToCart();
+                    } else {
+                        alert("এই বারকোডের ওষুধ স্টকে নেই!");
+                    }
+                }
+            );
+        }
+
+        function stopBarcodeScanner() {
+            if(html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('barcodeReaderContainer').style.display = 'none';
+                });
+            }
+        }
+
+        /* POS & THERMAL RECEIPT PRINTING */
+        function searchMedicine() {
+            const query = document.getElementById('medSearchInput').value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '';
+
+            if (!query) { resultsContainer.style.display = 'none'; return; }
+
+            const matches = products.filter(p => p.name.toLowerCase().includes(query) || (p.barcode && p.barcode.includes(query)));
+            if (matches.length > 0) {
+                matches.forEach(p => {
+                    const itemIdx = products.indexOf(p);
+                    const div = document.createElement('div');
+                    div.className = 'search-item';
+                    div.innerHTML = `<span><b>${p.name}</b></span><span>৳${p.sellPrice} | স্টক: ${p.stock}</span>`;
+                    div.onclick = () => selectMedicineForCart(itemIdx);
+                    resultsContainer.appendChild(div);
+                });
+                resultsContainer.style.display = 'block';
+            }
+        }
+
+        function selectMedicineForCart(index) {
+            selectedProductIndex = index;
+            const p = products[index];
+            document.getElementById('selectedMedName').innerText = `${p.name} - ৳${p.sellPrice} (স্টক: ${p.stock})`;
+            document.getElementById('selectedItemBar').style.display = 'block';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        function addSelectedToCart() {
+            if (selectedProductIndex === null) return;
+            const p = products[selectedProductIndex];
+            const qty = parseFloat(document.getElementById('saleQty').value) || 1;
+
+            cart.push({ productIndex: selectedProductIndex, name: p.name, buyPrice: p.buyPrice, sellPrice: p.sellPrice, qty });
+            selectedProductIndex = null;
+            document.getElementById('selectedItemBar').style.display = 'none';
+            document.getElementById('medSearchInput').value = '';
+            renderCart();
+        }
+
+        function renderCart() {
+            const tblCart = document.getElementById('tblCart');
+            tblCart.innerHTML = '';
+            let subTotal = 0;
+            cart.forEach((item, idx) => {
+                const itemTotal = item.sellPrice * item.qty;
+                subTotal += itemTotal;
+                tblCart.innerHTML += `<tr><td>${item.name}</td><td>${item.qty}</td><td>৳${item.sellPrice}</td><td>৳${itemTotal.toFixed(2)}</td><td><button onclick="cart.splice(${idx},1);renderCart();">X</button></td></tr>`;
+            });
+            document.getElementById('cartSubTotal').innerText = subTotal.toFixed(2);
+            calculateFinalTotal();
+        }
+
+        function calculateFinalTotal() {
+            const subTotal = parseFloat(document.getElementById('cartSubTotal').innerText) || 0;
+            const discountVal = parseFloat(document.getElementById('discountValue').value) || 0;
+            const paidVal = parseFloat(document.getElementById('custPaid').value) || 0;
+
+            let grandTotal = Math.max(0, subTotal - discountVal);
+            let dueTotal = Math.max(0, grandTotal - paidVal);
+
+            document.getElementById('cartGrandTotal').innerText = grandTotal.toFixed(2);
+            document.getElementById('cartDueTotal').innerText = dueTotal.toFixed(2);
+        }
+
+        function completeSaleAndPrint() {
+            if (cart.length === 0) return alert('কার্ট খালি!');
+
+            const grandTotal = parseFloat(document.getElementById('cartGrandTotal').innerText) || 0;
+            const paid = parseFloat(document.getElementById('custPaid').value) || 0;
+            const due = parseFloat(document.getElementById('cartDueTotal').innerText) || 0;
+            const custName = document.getElementById('custName').value.trim() || 'General Customer';
+
+            // Print Receipt Setup
+            document.getElementById('printDate').innerText = new Date().toLocaleString('bn-BD');
+            document.getElementById('printCust').innerText = `কাস্টমার: ${custName}`;
+            let printItemsHTML = '';
+            cart.forEach(c => {
+                printItemsHTML += `<div style="display:flex; justify-content:space-between;"><span>${c.name} x${c.qty}</span><span>৳${(c.sellPrice * c.qty).toFixed(2)}</span></div>`;
+                products[c.productIndex].stock -= c.qty;
+            });
+            document.getElementById('printItems').innerHTML = printItemsHTML;
+            document.getElementById('printGrand').innerText = `৳${grandTotal.toFixed(2)}`;
+            document.getElementById('printPaid').innerText = `৳${paid.toFixed(2)}`;
+            document.getElementById('printDue').innerText = `৳${due.toFixed(2)}`;
+
+            sales.push({
+                date: new Date().toLocaleDateString('bn-BD'),
+                rawDate: new Date().toISOString().split('T')[0],
+                grandTotal, paid, due, customer: custName
+            });
+
+            saveData();
+            window.print();
+            cart = [];
+            renderCart();
+        }
+
+        /* SUPPLIER LEDGER */
+        function addSupplierTransaction() {
+            const name = document.getElementById('supName').value.trim();
+            const bill = parseFloat(document.getElementById('supBill').value) || 0;
+            const paid = parseFloat(document.getElementById('supPaid').value) || 0;
+
+            if(!name) return;
+            suppliers.push({ name, bill, paid, due: bill - paid });
+            saveData();
+        }
+
+        /* EXPENSE MANAGER */
+        function addExpense() {
+            const title = document.getElementById('expTitle').value.trim();
+            const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+
+            if(!title || !amount) return;
+            expenses.push({ date: new Date().toLocaleDateString('bn-BD'), title, amount });
+            saveData();
+        }
+
+        /* UI REFRESH & ANALYTICS CHART */
+        function refreshUI() {
+            // Suppliers
+            const tblSuppliers = document.getElementById('tblSuppliers');
+            if(tblSuppliers) {
+                tblSuppliers.innerHTML = '';
+                suppliers.forEach(s => {
+                    tblSuppliers.innerHTML += `<tr><td><b>${s.name}</b></td><td>৳${s.bill}</td><td>৳${s.paid}</td><td style="color:red;">৳${s.due}</td></tr>`;
+                });
+            }
+
+            // Expenses
+            const tblExpenses = document.getElementById('tblExpenses');
+            if(tblExpenses) {
+                tblExpenses.innerHTML = '';
+                expenses.forEach(e => {
+                    tblExpenses.innerHTML += `<tr><td>${e.date}</td><td>${e.title}</td><td>৳${e.amount}</td></tr>`;
+                });
+            }
+        }
+
+        function renderSalesChart() {
+            const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'মাসিক বিক্রি (৳)',
+                        data: [12000, 19000, 15000, 22000],
+                        backgroundColor: '#e53935'
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
 </html>
