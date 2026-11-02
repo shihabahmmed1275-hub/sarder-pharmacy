@@ -8,7 +8,7 @@ export async function POST(req: Request) {
         const { imagesBase64, specialNote } = await req.json();
 
         if (!imagesBase64 || imagesBase64.length === 0) {
-            return NextResponse.json({ success: false, message: 'কোনো ছবি পাওয়া যায়নি!' }, { status: 400 });
+            return NextResponse.json({ success: false, message: 'kono chobi pawa jayni!' }, { status: 400 });
         }
 
         const imageParts = imagesBase64.map((img: string) => {
@@ -36,7 +36,6 @@ export async function POST(req: Request) {
         }
         Special note from user: ${specialNote || 'None'}`;
 
-        // Using Gemini 2.5 Flash model with the correct SDK structure
         const model = genAI.getGenerativeModel({ 
             model: 'gemini-2.5-flash',
             generationConfig: { responseMimeType: 'application/json' }
@@ -53,6 +52,6 @@ export async function POST(req: Request) {
         });
     } catch (error: any) {
         console.error('Prescription Scan Error:', error);
-        return NextResponse.json({ success: false, message: 'প্রেসক্রিপশন স্ক্যান করতে ব্যর্থ হয়েছে।' }, { status: 500 });
+        return NextResponse.json({ success: false, message: 'prescription scan korte byortho hoyeche.' }, { status: 500 });
     }
 }
